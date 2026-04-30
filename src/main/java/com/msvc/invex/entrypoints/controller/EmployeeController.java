@@ -26,7 +26,7 @@ public class EmployeeController {
 
     @GetMapping
     public ResponseEntity<List<EmployeeResponse>> getAll() {
-        List<EmployeeResponse> response = service.getAll()
+        List<EmployeeResponse> response = service.getAll()	
                 .stream()
                 .map(EmployeeMapper::toResponse)
                 .toList();
