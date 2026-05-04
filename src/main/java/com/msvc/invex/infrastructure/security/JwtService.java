@@ -34,4 +34,13 @@ public class JwtService {
             throw new JwtAuthenticationException("Error al validar el token");
         }
     }
+
+    public String extractUsername(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
 }
