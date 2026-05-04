@@ -11,8 +11,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -30,20 +32,23 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        return path.startsWith("/auth") ||
+               path.startsWith("/swagger-ui") ||
+               path.startsWith("/v3/api-docs") ||
+               path.startsWith("/actuator") ||
+               path.contains("/docs") ||
+               path.equals("/swagger-ui.html") ||
+               path.contains("/webjars/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                    HttpServletResponse response,
                                    FilterChain filterChain)
             throws ServletException, IOException {
-
-        String path = request.getRequestURI();
-
-        if (path.contains("/auth") ||
-            path.contains("/swagger") ||
-            path.contains("/v3/api-docs") ||
-            path.contains("/actuator")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         try {
             String header = request.getHeader("Authorization");
