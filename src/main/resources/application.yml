@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
   servlet:
     context-path: /api/v1
 
@@ -55,3 +55,7 @@ logging:
     com.msvc.invex: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+jwt:
+  secret: bXktc3VwZXItc2VjcmV0LWtleS1pbnZleC0yMDI2LXZlcnktc2VjdXJl
+  expiration: 600000

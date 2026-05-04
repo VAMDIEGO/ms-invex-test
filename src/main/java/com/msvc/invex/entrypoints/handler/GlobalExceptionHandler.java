@@ -1,6 +1,7 @@
 package com.msvc.invex.entrypoints.handler;
 
 import com.msvc.invex.entrypoints.dto.ErrorResponse;
+import com.msvc.invex.entrypoints.dto.JwtAuthenticationException;
 import com.msvc.invex.infrastructure.exceptions.EmployeeNotFoundException;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,5 +62,18 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+    
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleJwtError(JwtAuthenticationException ex) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .code("UNAUTHORIZED")
+                .message(ex.getMessage())
+                .details(Collections.singletonList("Token inválido o expirado"))
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 }
