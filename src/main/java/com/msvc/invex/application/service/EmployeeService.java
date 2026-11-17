@@ -4,18 +4,18 @@ package com.msvc.invex.application.service;
 import com.msvc.invex.domain.model.Employee;
 import com.msvc.invex.domain.port.EmployeeRepositoryPort;
 import com.msvc.invex.infrastructure.exceptions.EmployeeNotFoundException;
+
+import lombok.AllArgsConstructor;
+
 import com.msvc.invex.application.usecase.EmployeeUseCase;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class EmployeeService implements EmployeeUseCase {
 
 	private final EmployeeRepositoryPort repository;
-
-	public EmployeeService(EmployeeRepositoryPort repository) {
-		this.repository = repository;
-	}
 
 	@Override
 	public List<Employee> getAll() {
@@ -50,4 +50,7 @@ public class EmployeeService implements EmployeeUseCase {
 	public List<Employee> search(String name) {
 		return repository.findByName(name);
 	}
+	
+	
+	
 }
