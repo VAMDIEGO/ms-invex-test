@@ -1,34 +1,46 @@
 package com.msvc.invex.entrypoints.controller;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.msvc.invex.application.usecase.EmployeeUseCase;
 import com.msvc.invex.domain.model.Employee;
 import com.msvc.invex.entrypoints.dto.EmployeeRequest;
 import com.msvc.invex.entrypoints.dto.EmployeeResponse;
 import com.msvc.invex.entrypoints.mapper.EmployeeMapper;
 
-import javax.validation.Valid;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/employees")
 @Tag(name = "Employees", description = "Operaciones de gestión de empleados")
+@Validated
 public class EmployeeController {
 
-    private final EmployeeUseCase service;
+    private final EmployeeUseCase employeeUseCase;
 
     public EmployeeController(EmployeeUseCase service) {
-        this.service = service;
+        this.employeeUseCase = service;
     }
 
     @GetMapping
@@ -36,7 +48,7 @@ public class EmployeeController {
     @ApiResponse(responseCode = "200", description = "Lista de empleados obtenida correctamente")
     public ResponseEntity<List<EmployeeResponse>> getAll() {
 
-        List<EmployeeResponse> response = service.getAll()
+        List<EmployeeResponse> response = employeeUseCase.getAll()
                 .stream()
                 .map(EmployeeMapper::toResponse)
                 .toList();
@@ -54,7 +66,7 @@ public class EmployeeController {
             @Parameter(description = "ID del empleado", example = "1")
             @PathVariable Long id) {
 
-        EmployeeResponse response = EmployeeMapper.toResponse(service.getById(id));
+        EmployeeResponse response = EmployeeMapper.toResponse(employeeUseCase.getById(id));
         return ResponseEntity.ok(response);
     }
 
@@ -62,13 +74,13 @@ public class EmployeeController {
     @Operation(summary = "Crear empleados (lista)")
     @ApiResponse(responseCode = "201", description = "Empleados creados correctamente")
     public ResponseEntity<List<EmployeeResponse>> create(
-            @Valid @RequestBody List<EmployeeRequest> request) {
+            @Valid @RequestBody List<@Valid EmployeeRequest> request) {
 
         List<Employee> employees = request.stream()
                 .map(EmployeeMapper::toDomain)
                 .toList();
 
-        List<EmployeeResponse> response = service.create(employees)
+        List<EmployeeResponse> response = employeeUseCase.create(employees)
                 .stream()
                 .map(EmployeeMapper::toResponse)
                 .toList();
@@ -83,19 +95,17 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Empleado no encontrado")
     })
     public ResponseEntity<EmployeeResponse> update(
-            @Parameter(description = "ID del empleado", example = "1")
             @PathVariable Long id,
             @Valid @RequestBody EmployeeRequest request) {
 
         Employee employee = EmployeeMapper.toDomain(request);
 
         EmployeeResponse response = EmployeeMapper.toResponse(
-                service.update(id, employee)
+                employeeUseCase.update(id, employee)
         );
 
         return ResponseEntity.ok(response);
     }
-
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar empleado")
     @ApiResponses(value = {
@@ -106,7 +116,7 @@ public class EmployeeController {
             @Parameter(description = "ID del empleado", example = "1")
             @PathVariable Long id) {
 
-        service.delete(id);
+        employeeUseCase.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -117,11 +127,14 @@ public class EmployeeController {
             @Parameter(description = "Nombre o parte del nombre", example = "Juan")
             @RequestParam String name) {
 
-        List<EmployeeResponse> response = service.search(name)
+        List<EmployeeResponse> response = employeeUseCase.search(name)
                 .stream()
                 .map(EmployeeMapper::toResponse)
                 .toList();
 
         return ResponseEntity.ok(response);
     }
+    
 }
+
+  
